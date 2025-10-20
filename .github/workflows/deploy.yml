@@ -1,5 +1,6 @@
 name: github pages
 
+
 on:
   push:
     branches:
@@ -9,5 +10,25 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: "Dioxus Deploy"
-        uses: DioxusLabs/deploy-action@0.1.2
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
+        profile: minimal
+        target: wasm32-unknown-unknown
+        override: true
+    - uses: Swatinem/rust-cache@v2
+    - name: Install Dioxus-CLI
+      shell: bash
+      run: cargo install dioxus-cli
+
+    - name: Build Project 🎁
+      shell: bash
+      run: cd . && dx build --release
+
+    - name: Deploy Project 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+        branch: gh-pages
+        folder: ./dist
+        clean: false
