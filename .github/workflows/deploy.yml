@@ -18,15 +18,17 @@ jobs:
         target: wasm32-unknown-unknown
         override: true
     - uses: Swatinem/rust-cache@v2
+    - name: Update Project Dependencies
+      shell: bash
+      run: |
+        cargo update
     - name: Install Dioxus-CLI
       shell: bash
-      run: cargo install dioxus-cli
-
-    - name: Build Project 🎁
+      run: cargo install dioxus-cli --force
+    - name: Build Project
       shell: bash
       run: cd . && dx build --release
-
-    - name: Deploy Project 🚀
+    - name: Deploy Project
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:
         branch: gh-pages
