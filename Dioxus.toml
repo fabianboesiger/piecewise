@@ -4,7 +4,7 @@ asset_dir = "assets"
 [web.app]
 
 # HTML title tag content
-title = "keysplit"
+title = "Piecewise"
 
 # include `assets` in web platform
 [web.resource]

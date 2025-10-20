@@ -2,10 +2,10 @@
 // need dioxus
 use dioxus::prelude::*;
 
-mod keysplit;
+mod ui;
 mod bytearray;
 
-use keysplit::KeySplit;
+use ui::Ui;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
@@ -21,7 +21,7 @@ fn App() -> Element {
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         
         main {
-            KeySplit {}
+            Ui {}
         }
     }
 }

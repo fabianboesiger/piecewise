@@ -96,7 +96,7 @@ fn compute(mut key: Signal<String>, mut values: Signal<Vec<String>>, mode: Signa
 }
 
 #[component]
-pub fn KeySplit() -> Element {
+pub fn Ui() -> Element {
     let mut values = use_signal(|| vec!["".to_string(), "".to_string()]);
     let mut key = use_signal(|| "".to_string());
     let mut mode: Signal<Mode> = use_signal(|| Mode::Split);

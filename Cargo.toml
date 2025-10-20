@@ -1,5 +1,5 @@
 [package]
-name = "keysplit"
+name = "piecewise"
 version = "0.1.0"
 authors = ["Fabian Bösiger <fabian.boesiger@ajila.com>"]
 edition = "2021"
