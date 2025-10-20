@@ -1,0 +1,148 @@
+@font-face {
+  font-family: "Urbanist";
+  font-style: normal;
+  font-weight: normal;
+  src: url("/assets/Urbanist/static/Urbanist-Regular.ttf") format("ttf");
+}
+
+:root {
+    --text-color: #0f1116;
+    --background-color: #ffffff;
+    --error-color: #dd0000;
+}
+
+main {
+    max-width: 600px;
+    margin: auto;
+    padding: 16px;
+}
+
+h1 {
+    margin-bottom: -8px;
+}
+
+body {
+    background: var(--background-color);
+    font-family: sans-serif;
+}
+
+fieldset {
+    border: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+legend {
+    font-weight: bold;
+    padding: 0;
+    margin: 0;
+}
+
+label {
+    margin-bottom: 2px;
+}
+
+input, button, .icon {
+    padding: 8px;
+    border: 1px solid var(--text-color);
+    border-radius: 8px;
+    background: var(--background-color);
+}
+
+input {
+    font-family: monospace;
+}
+
+button.secondary {
+    background: var(--text-color);
+    color: var(--background-color);
+}
+
+button.active {
+    background: var(--primary-color);
+    color: var(--background-color);
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.row {
+    display: flex;
+    width: 100%;
+    margin: 2px 0;
+}
+
+.row button {
+    flex-grow: 0;
+}
+
+.row input {
+    flex-grow: 1;
+}
+
+.row button:not(:first-child),
+.row input:not(:first-child),
+.row .icon:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.row button:not(:last-child),
+.row input:not(:last-child),
+.row .icon:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-icon {
+    border-right: none;
+}
+
+.input-icon + input {
+    border-left: none;
+}
+
+.field {
+    margin: 8px 0;
+}
+
+.hidden {
+    opacity: 0;
+}
+
+.visible {
+    opacity: 100%;
+}
+
+#icon-split {
+    transform: rotate(180deg) translateY(4px);
+}
+
+.animated-icon {
+    display: inline-block;
+    /*transition: color 0.2s;
+    transition: opacity 0.2s;*/
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.animated-icon-wrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    margin: auto;
+}
+
+.error {
+    color: var(--error-color);
+    font-size: 12px;
+}
+
+.info {
+    font-size: 12px;
+}
