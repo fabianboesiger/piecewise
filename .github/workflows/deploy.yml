@@ -29,12 +29,12 @@ jobs:
 
       - name: Install Dioxus-CLI
         shell: bash
-        #run: cargo install dioxus-cli --locked --force
+        #run: cargo install dioxus-cli --locked
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall dioxus-cli
+          cargo binstall dioxus-cli --force
 
       - name: Build Web Project
         shell: bash
