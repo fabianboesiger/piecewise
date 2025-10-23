@@ -190,7 +190,7 @@ pub fn Ui() -> Element {
                             }
                         }
                         button {
-                            class: "secondary icon",
+                            class: "icon",
                             onclick: move |_| {
                                 if values.len() <= 2 {
                                     return;
@@ -216,7 +216,6 @@ pub fn Ui() -> Element {
                 }
             }
             button {
-                class: "secondary",
                 onclick: move |_| {
                     values.write().push("".to_string());
                     compute(key, values, mode, err);
