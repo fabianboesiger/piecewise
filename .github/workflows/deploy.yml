@@ -33,7 +33,7 @@ jobs:
       shell: bash
       # Use cargo binstall for faster installation if possible, or keep as is.
       # Keeping `cargo install` is safest if `cargo binstall` isn't pre-installed.
-      run: cargo binstall dioxus-cli
+      run: cargo install dioxus-cli --locked
 
     # 6. Build Project: Added --locked for reproducible builds.
     - name: Build Project
