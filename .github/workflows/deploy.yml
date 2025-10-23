@@ -9,57 +9,111 @@ permissions:
   contents: write
 
 jobs:
-  build-deploy:
+  web-build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: dtolnay/rust-toolchain@stable
-      with:
-        toolchain: stable
-        profile: minimal
-        target: wasm32-unknown-unknown
-        override: true
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          profile: minimal
+          target: wasm32-unknown-unknown
+          override: true
 
-    - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
 
-    - name: Update Project Dependencies
-      shell: bash
-      run: cargo update --locked
+      - name: Update Project Dependencies
+        shell: bash
+        run: cargo update --locked
 
-    - name: Install Dioxus-CLI
-      shell: bash
-      run: cargo install dioxus-cli --locked
+      - name: Install Dioxus-CLI
+        shell: bash
+        run: cargo install dioxus-cli --locked
 
-    - name: Build Project
-      shell: bash
-      run: dx build --release --platform web
+      - name: Build Web Project
+        shell: bash
+        run: dx build --release --platform web
+        
+      - name: Upload Web Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-release-content
+          path: target/dx/piecewise/release/web/public/
+  
+  native-build:
+    needs: web-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            filename: Piecewise
+          - os: windows-latest
+            platform: windows
+            filename: Piecewise.exe
+          - os: macos-latest
+            platform: macos
+            filename: Piecewise
 
-    - name: Build Project for MacOS
-      shell: bash
-      run: dx build --release --platform macos
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
 
-    - name: Build Project for Windows
-      shell: bash
-      run: dx build --release --platform windows
+      - uses: Swatinem/rust-cache@v2
 
-    - name: Build Project for Linux
-      shell: bash
-      run: dx build --release --platform linux
+      - name: Install Dioxus-CLI
+        shell: bash
+        run: cargo install dioxus-cli --locked
 
-    - name: Copy Releases to Public Directory
-      shell: bash
-      run: |
-        mkdir -p target/dx/piecewise/release/web/public/releases/macos
-        mkdir -p target/dx/piecewise/release/web/public/releases/windows
-        mkdir -p target/dx/piecewise/release/web/public/releases/linux
-        cp target/dx/piecewise/release/macos/Piecewise target/dx/piecewise/release/web/public/releases/macos/
-        cp target/dx/piecewise/release/windows/Piecewise.exe target/dx/piecewise/release/web/public/releases/windows/
-        cp target/dx/piecewise/release/linux/Piecewise target/dx/piecewise/release/web/public/releases/linux/
+      - name: Build Native Project for ${{ matrix.platform }}
+        shell: bash
+        run: dx build --release --platform ${{ matrix.platform }}
+      
+      - name: Upload Native Executable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-release-${{ matrix.platform }}
+          path: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
 
-    - name: Deploy Project
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: gh-pages
-        folder: target/dx/piecewise/release/web/public
-        clean: false
+  deploy:
+    needs: [web-build, native-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Web Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-release-content
+          path: public/
+          
+      - name: Download MacOS Executable
+        uses: actions/download-artifact@v4
+        with:
+          name: native-release-macos
+          path: public/releases/macos
+          
+      - name: Download Windows Executable
+        uses: actions/download-artifact@v4
+        with:
+          name: native-release-windows
+          path: public/releases/windows
+          
+      - name: Download Linux Executable
+        uses: actions/download-artifact@v4
+        with:
+          name: native-release-linux
+          path: public/releases/linux
+
+      - name: Deploy Project
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: public
+          clean: false

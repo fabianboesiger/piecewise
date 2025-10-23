@@ -19,6 +19,11 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
+        document::Title { "Piecewise" }
+        document::Meta { name: "viewport", content: "width=device-width, initial-scale=1" }
+        document::Meta { name: "description", content: "Securely share a key through multiple channels." }
+        document::Meta { name: "keywords", content: "key,split,share,secure,security,encryption,keysplit,multichannel,key sharing,multichannel key sharing" }
+        document::Meta { name: "author", content: "Fabian Boesiger" }
         
         main {
             Ui {}
