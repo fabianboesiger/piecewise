@@ -1,4 +1,4 @@
-name: github pages
+name: Deploy
 
 on:
   push:
@@ -46,76 +46,3 @@ jobs:
           branch: gh-pages
           folder: target/dx/piecewise/release/web/public
           clean: false
-
-  release:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: ubuntu-latest
-            platform: linux
-            filename: Piecewise
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            platform: windows
-            filename: Piecewise.exe
-            target: x86_64-pc-windows-msvc
-          - os: macos-latest
-            platform: macos
-            filename: Piecewise.app
-            target: x86_64-apple-darwin
-
-    steps:
-      - uses: actions/checkout@v4
-        
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          profile: minimal
-          target: ${{ matrix.target }}
-          override: true
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Install System Dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --reinstall pkg-config libicu-dev build-essential clang lld libssl-dev libglib2.0-dev libgtk-3-dev libgtk-4-dev libwebkit2gtk-4.1-dev libsoup-3.0-dev libxdo-dev
-
-      - name: Install System Dependencies (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install openssl@3
-          brew link openssl@3 --force
-
-      - name: Install System Dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          # Windows dependencies are handled by vcpkg/cargo on Windows
-          # No additional system packages needed
-
-      - name: Update Project Dependencies
-        shell: bash
-        run: cargo update --locked
-
-      - name: Install Dioxus-CLI
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #run: cargo install dioxus-cli --locked
-        run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall dioxus-cli --force
-
-      - name: Build Native Project for ${{ matrix.platform }}
-        shell: bash
-        run: dx build --release --platform ${{ matrix.platform }} -- -vv
-        
-      - name: Upload Native Executable to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
-          name: ${{ matrix.filename }}
