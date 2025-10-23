@@ -30,7 +30,9 @@ jobs:
       - name: Install Dioxus-CLI
         shell: bash
         #run: cargo install dioxus-cli --locked
-        run: cargo install cargo-binstall && cargo binstall dioxus-cli
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall dioxus-cli
 
       - name: Build Web Project
         shell: bash
@@ -40,5 +42,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
-          folder: target/dx/piecewise/web/public
+          folder: target/dx/piecewise/release/web/public
           clean: false
