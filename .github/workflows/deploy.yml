@@ -32,7 +32,7 @@ jobs:
         #run: cargo install dioxus-cli --locked
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall dioxus-cli
+          cargo binstall dioxus-cli --force
 
       - name: Build Web Project
         shell: bash
@@ -44,3 +44,56 @@ jobs:
           branch: gh-pages
           folder: target/dx/piecewise/release/web/public
           clean: false
+
+  release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            filename: Piecewise
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            platform: windows
+            filename: Piecewise.exe
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            platform: macos
+            filename: Piecewise.app
+            target: x86_64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v4
+        
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          profile: minimal
+          target: wasm32-unknown-unknown
+          override: true
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Update Project Dependencies
+        shell: bash
+        run: cargo update --locked
+
+      - name: Install Dioxus-CLI
+        shell: bash
+        #run: cargo install dioxus-cli --locked
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+          cargo binstall dioxus-cli --force
+
+      - name: Build Native Project for ${{ matrix.platform }}
+        shell: bash
+        run: dx build --release --platform ${{ matrix.platform }}
+        
+      - name: Upload Native Executable to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
+          name: ${{ matrix.filename }}
