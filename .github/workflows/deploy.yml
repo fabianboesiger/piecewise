@@ -29,7 +29,8 @@ jobs:
 
       - name: Install Dioxus-CLI
         shell: bash
-        run: cargo install dioxus-cli --locked
+        #run: cargo install dioxus-cli --locked
+        run: cargo install cargo-binstall && cargo binstall dioxus-cli
 
       - name: Build Web Project
         shell: bash
@@ -42,7 +43,6 @@ jobs:
           path: target/dx/piecewise/release/web/public/
   
   native-build:
-    needs: web-build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Dioxus-CLI
         shell: bash
-        run: cargo install dioxus-cli --locked
+        run: cargo install cargo-binstall && cargo binstall dioxus-cli
 
       - name: Build Native Project for ${{ matrix.platform }}
         shell: bash
