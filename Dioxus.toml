@@ -5,6 +5,7 @@ asset_dir = "assets"
 
 # HTML title tag content
 title = "Piecewise"
+base_path = "piecewise"
 
 # include `assets` in web platform
 [web.resource]
