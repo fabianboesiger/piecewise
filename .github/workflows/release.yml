@@ -1,18 +1,84 @@
 name: Release
 
+# Workflow now ONLY triggers on push to main or manual dispatch.
+# The 'push: tags: v*' trigger is removed to prevent a second, redundant workflow run.
 on:
   push:
-    tags:
-      - 'v*'
-  
+    branches:
+      - main
+  workflow_dispatch:
+
 permissions:
   contents: write
 
-jobs:  
-  release:
-    if: startsWith(github.ref, 'refs/tags/')
+jobs:
+  # --------------------------------------------------------------------------------
+  # JOB 1: TAG CHECK AND CREATION
+  # --------------------------------------------------------------------------------
+  tag_check:
+    name: Check Cargo Version and Create Tag
+    runs-on: ubuntu-latest
+    
+    # Define job outputs: We will export the new tag name (or empty string)
+    outputs:
+      new_tag: ${{ steps.tagging.outputs.new_tag }}
+      
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install jq (JSON processor)
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Auto-Tag New Version
+        id: tagging # Assign an ID to this step to capture its output
+        # GH_TRIGGER_TOKEN environment variable removed as GITHUB_TOKEN is sufficient for chained jobs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          CARGO_VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          LATEST_TAG=$(git describe --tags --abbrev=0 2> /dev/null || echo "v0.0.0")
+          LATEST_VERSION=${LATEST_TAG#v}
+          
+          NEW_TAG="v$CARGO_VERSION"
+          
+          echo "Current Cargo.toml Version: $CARGO_VERSION"
+          echo "Latest Tagged Version: $LATEST_TAG ($LATEST_VERSION)"
+          
+          if [[ "$CARGO_VERSION" != "$LATEST_VERSION" ]]; then
+            echo "::notice title=New Version Detected::Creating and pushing tag $NEW_TAG. The release job will proceed in this run."
+            
+            # Create and push the tag using the standard GITHUB_TOKEN
+            git tag "$NEW_TAG" -a -m "Release $NEW_TAG"
+            # Use GITHUB_TOKEN context instead of GH_TRIGGER_TOKEN secret
+            REPO_URL="https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+            git push "$REPO_URL" "$NEW_TAG"
+            
+            # Set the output variable for the next job
+            echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+            
+          else
+            echo "Cargo.toml version ($CARGO_VERSION) matches latest tag. Skipping tag creation."
+            # Set output to empty string to skip the release_build job
+            echo "new_tag=" >> $GITHUB_OUTPUT
+          fi
+          
+  # --------------------------------------------------------------------------------
+  # JOB 2: RELEASE BUILD AND UPLOAD
+  # Runs only if a new tag was created in tag_check.
+  # --------------------------------------------------------------------------------
+  release_build:
+    name: Build ${{ matrix.platform }} Binary
+    
+    # Conditional run: only proceed if the previous job set a new_tag output
+    if: needs.tag_check.outputs.new_tag != ''
     runs-on: ${{ matrix.os }}
+    
+    # Dependency on tag_check is required to access its outputs
+    needs: tag_check 
+    
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         include:
@@ -28,9 +94,14 @@ jobs:
             platform: macos
             filename: Piecewise.app
             target: x86_64-apple-darwin
+            
     steps:
+      # Checkout the specific tag that was just created/pushed
       - uses: actions/checkout@v4
-        
+        with:
+          # Use the tag name output from the previous job as the ref
+          ref: ${{ needs.tag_check.outputs.new_tag }}
+      
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -39,7 +110,8 @@ jobs:
           override: true
 
       - uses: Swatinem/rust-cache@v2
-
+      
+      # Install OS-specific Dependencies
       - name: Install System Dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -52,33 +124,29 @@ jobs:
           brew install openssl@3
           brew link openssl@3 --force
 
-      - name: Install System Dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          # Windows dependencies are handled by vcpkg/cargo on Windows
-          # No additional system packages needed
-
       - name: Update Project Dependencies
         shell: bash
         run: cargo update --locked
 
+      # Install Dioxus-CLI using cargo-binstall for speed
       - name: Install Dioxus-CLI
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #run: cargo install dioxus-cli --locked
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
           cargo binstall dioxus-cli --force
-
+          
+      # Build the native project
       - name: Build Native Project for ${{ matrix.platform }}
         shell: bash
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
-        
+          
+      # Upload the executable to the GitHub Release
       - name: Upload Native Executable to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
-          name: ${{ matrix.filename }}
           draft: false
           prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
