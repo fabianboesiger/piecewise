@@ -5,14 +5,15 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
-    # 1. Checkout: Latest major version (v4) is correct.
     - uses: actions/checkout@v4
 
-    # 2. Rust Toolchain: Using @stable is correct for a Dioxus/Wasm project.
     - uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
@@ -20,29 +21,42 @@ jobs:
         target: wasm32-unknown-unknown
         override: true
 
-    # 3. Rust Cache: Latest major version (v2) is correct.
     - uses: Swatinem/rust-cache@v2
 
-    # 4. Update Project Dependencies: Added --locked for CI best practice.
     - name: Update Project Dependencies
       shell: bash
       run: cargo update --locked
 
-    # 5. Install Dioxus-CLI: Still necessary to get the 'dx' command.
     - name: Install Dioxus-CLI
       shell: bash
-      # Use cargo binstall for faster installation if possible, or keep as is.
-      # Keeping `cargo install` is safest if `cargo binstall` isn't pre-installed.
       run: cargo install dioxus-cli --locked
 
-    # 6. Build Project: Added --locked for reproducible builds.
     - name: Build Project
       shell: bash
       run: dx build --release --platform web
 
-    # 7. Deploy Project: Updated to use the latest minor/patch version (v4.7.3) 
-    # or the major version tag (@v4) for auto-updates. Using @v4 is generally safer 
-    # for long-term maintenance, but a specific patch is used here for "most current."
+    - name: Build Project for MacOS
+      shell: bash
+      run: dx build --release --platform macos
+
+    - name: Build Project for Windows
+      shell: bash
+      run: dx build --release --platform windows
+
+    - name: Build Project for Linux
+      shell: bash
+      run: dx build --release --platform linux
+
+    - name: Copy Releases to Public Directory
+      shell: bash
+      run: |
+        mkdir -p target/dx/piecewise/release/web/public/releases/macos
+        mkdir -p target/dx/piecewise/release/web/public/releases/windows
+        mkdir -p target/dx/piecewise/release/web/public/releases/linux
+        cp target/dx/piecewise/release/macos/Piecewise target/dx/piecewise/release/web/public/releases/macos/
+        cp target/dx/piecewise/release/windows/Piecewise.exe target/dx/piecewise/release/web/public/releases/windows/
+        cp target/dx/piecewise/release/linux/Piecewise target/dx/piecewise/release/web/public/releases/linux/
+
     - name: Deploy Project
       uses: JamesIves/github-pages-deploy-action@v4
       with:

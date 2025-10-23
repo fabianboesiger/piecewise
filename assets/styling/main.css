@@ -15,6 +15,7 @@ main {
     max-width: 600px;
     margin: auto;
     padding: 16px;
+    font-size: 12px;
 }
 
 h1 {
@@ -26,41 +27,21 @@ body {
     font-family: sans-serif;
 }
 
-fieldset {
+fieldset, details {
     border: none;
     padding: 0;
     margin: 16px 0;
 }
 
-legend {
+legend, summary {
     font-weight: bold;
     padding: 0;
     margin: 0;
+    font-size: 16px;
 }
 
 label {
     margin-bottom: 2px;
-}
-
-input, button, .icon {
-    padding: 8px;
-    border: 1px solid var(--text-color);
-    border-radius: 8px;
-    background: var(--background-color);
-}
-
-input {
-    font-family: monospace;
-}
-
-button.secondary {
-    background: var(--text-color);
-    color: var(--background-color);
-}
-
-button.active {
-    background: var(--primary-color);
-    color: var(--background-color);
 }
 
 .icon {
@@ -70,13 +51,37 @@ button.active {
     padding: 4px;
 }
 
+input, .icon, button, .button {
+    padding: 8px;
+    border: 1px solid var(--text-color);
+    border-radius: 8px;
+    background: var(--background-color);
+    color: var(--text-color);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+input {
+    font-family: monospace;
+}
+
+button:hover, .button:hover {
+    background: #333 !important;
+}
+
+button, .button {
+    background: var(--text-color) !important;
+    color: var(--background-color) !important;
+}
+
+
 .row {
     display: flex;
     width: 100%;
     margin: 2px 0;
 }
 
-.row button {
+.row button, .row .button {
     flex-grow: 0;
 }
 
@@ -85,6 +90,7 @@ button.active {
 }
 
 .row button:not(:first-child),
+.row .button:not(:first-child),
 .row input:not(:first-child),
 .row .icon:not(:first-child) {
     border-top-left-radius: 0;
@@ -92,6 +98,7 @@ button.active {
 }
 
 .row button:not(:last-child),
+.row .button:not(:last-child),
 .row input:not(:last-child),
 .row .icon:not(:last-child) {
     border-top-right-radius: 0;

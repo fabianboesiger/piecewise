@@ -22,6 +22,25 @@ fn App() -> Element {
         
         main {
             Ui {}
+            {
+                // Check if we are compiling for the web target
+                if cfg!(target_arch = "wasm32") {
+                    rsx! {
+                        details { 
+                            summary { "Download the App" }
+                            p { class: "info", "This app is also avaliable to download for offline use." }
+                            div {
+                                class: "row",
+                                a { class: "button", href: "/releases/macos/Piecewise.app", "Download for macOS" }
+                                a { class: "button", href: "/releases/windows/Piecewise.exe", "Download for Windows" }
+                                a { class: "button", href: "/releases/linux/Piecewise", "Download for Linux" }
+                            }
+                        }
+                    }
+                } else {
+                    rsx! {}
+                }
+            }
         }
     }
 }
