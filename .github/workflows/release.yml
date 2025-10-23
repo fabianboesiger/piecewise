@@ -141,6 +141,11 @@ jobs:
       - name: Build Native Project for ${{ matrix.platform }}
         shell: bash
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
+
+      - name: Verify Artifact Path
+        run: |
+          echo "Listing contents of the expected artifact directory (target/dx/piecewise/release/):"
+          ls -R target/dx/piecewise/release/ 2>/dev/null || echo "Directory not found or empty. Check the 'piecewise' app name in your path."
           
       # Upload the executable to the GitHub Release
       - name: Upload Native Executable to GitHub Release
