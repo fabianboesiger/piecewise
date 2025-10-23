@@ -1,8 +1,8 @@
 name: Release
 
 on:
-  workflow_dispatch:
-
+  push:
+  
 permissions:
   contents: write
 
@@ -78,3 +78,5 @@ jobs:
         with:
           files: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
           name: ${{ matrix.filename }}
+          draft: false
+          prerelease: false
