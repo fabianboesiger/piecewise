@@ -85,8 +85,8 @@ jobs:
       - name: Install System Dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          # macOS dependencies are typically available through Xcode Command Line Tools
-          # which are pre-installed on GitHub Actions runners
+          brew install openssl@3
+          brew link openssl@3 --force
 
       - name: Install System Dependencies (Windows)
         if: matrix.os == 'windows-latest'
