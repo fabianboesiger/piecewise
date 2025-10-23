@@ -29,7 +29,8 @@ jobs:
           if [[ "$CARGO_VERSION" != "$LATEST_VERSION" ]]; then
             echo "::notice title=New Version Detected::Creating and pushing tag v$CARGO_VERSION. This will trigger a new workflow run for the release."
             git tag "v$CARGO_VERSION" -a -m "Release v$CARGO_VERSION"
-            git push origin "v$CARGO_VERSION"
+            REPO_URL="https://${{ secrets.GH_TRIGGER_TOKEN }}@github.com/${{ github.repository }}.git"
+            git push "$REPO_URL" "v$CARGO_VERSION"
             exit 0
           else
             echo "Cargo.toml version ($CARGO_VERSION) matches latest tag. Proceeding with build but skipping tag creation."
