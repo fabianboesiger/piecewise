@@ -143,6 +143,7 @@ jobs:
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
 
       - name: Verify Artifact Path
+        shell: bash
         run: |
           echo "Listing contents of the expected artifact directory (target/dx/piecewise/release/):"
           ls -R target/dx/piecewise/release/ 2>/dev/null || echo "Directory not found or empty. Check the 'piecewise' app name in your path."
