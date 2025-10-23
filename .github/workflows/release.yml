@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 
-jobs:
+jobs:  
   release:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ${{ matrix.os }}
@@ -26,7 +26,6 @@ jobs:
             platform: macos
             filename: Piecewise.app
             target: x86_64-apple-darwin
-
     steps:
       - uses: actions/checkout@v4
         
