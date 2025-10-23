@@ -47,5 +47,5 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
-        folder: ./dist
+        folder: target/dx/piecewise/release/web/public
         clean: false
