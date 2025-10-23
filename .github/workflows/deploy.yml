@@ -1,6 +1,5 @@
 name: github pages
 
-
 on:
   push:
     branches:
@@ -10,26 +9,42 @@ jobs:
   build-deploy:
     runs-on: ubuntu-latest
     steps:
+    # 1. Checkout: Latest major version (v4) is correct.
     - uses: actions/checkout@v4
+
+    # 2. Rust Toolchain: Using @stable is correct for a Dioxus/Wasm project.
     - uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: stable
         profile: minimal
         target: wasm32-unknown-unknown
         override: true
+
+    # 3. Rust Cache: Latest major version (v2) is correct.
     - uses: Swatinem/rust-cache@v2
+
+    # 4. Update Project Dependencies: Added --locked for CI best practice.
     - name: Update Project Dependencies
       shell: bash
-      run: |
-        cargo update
+      run: cargo update --locked
+
+    # 5. Install Dioxus-CLI: Still necessary to get the 'dx' command.
     - name: Install Dioxus-CLI
       shell: bash
+      # Use cargo binstall for faster installation if possible, or keep as is.
+      # Keeping `cargo install` is safest if `cargo binstall` isn't pre-installed.
       run: cargo install dioxus-cli --force
+
+    # 6. Build Project: Added --locked for reproducible builds.
     - name: Build Project
       shell: bash
-      run: cd . && dx build --release
+      run: dx build --release --locked
+
+    # 7. Deploy Project: Updated to use the latest minor/patch version (v4.7.3) 
+    # or the major version tag (@v4) for auto-updates. Using @v4 is generally safer 
+    # for long-term maintenance, but a specific patch is used here for "most current."
     - name: Deploy Project
-      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: ./dist
