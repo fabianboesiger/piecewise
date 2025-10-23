@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Web Project
         shell: bash
-        run: dx build --release --platform web
+        run: dx build -vv --release --platform web
         
       - name: Deploy Project
         uses: JamesIves/github-pages-deploy-action@v4
@@ -107,7 +107,7 @@ jobs:
 
       - name: Build Native Project for ${{ matrix.platform }}
         shell: bash
-        run: dx build --release --platform ${{ matrix.platform }}
+        run: dx build -vv --release --platform ${{ matrix.platform }}
         
       - name: Upload Native Executable to GitHub Release
         uses: softprops/action-gh-release@v1
