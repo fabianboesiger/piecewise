@@ -142,6 +142,10 @@ jobs:
         shell: bash
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
 
+      - name: Zip the macOS app bundle
+        run: |
+          zip -r target/dx/piecewise/release/${{ matrix.platform }}.zip target/dx/piecewise/release/${{ matrix.platform }}
+
       - name: Verify Artifact Path
         shell: bash
         run: |
@@ -152,7 +156,7 @@ jobs:
       - name: Upload Native Executable to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: target/dx/piecewise/release/${{ matrix.platform }}/${{ matrix.filename }}
+          files: target/dx/piecewise/release/${{ matrix.platform }}.zip
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
