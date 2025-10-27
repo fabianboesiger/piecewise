@@ -1,7 +1,5 @@
 name: Release
 
-# Workflow now ONLY triggers on push to main or manual dispatch.
-# The 'push: tags: v*' trigger is removed to prevent a second, redundant workflow run.
 on:
   push:
     branches:
@@ -12,14 +10,10 @@ permissions:
   contents: write
 
 jobs:
-  # --------------------------------------------------------------------------------
-  # JOB 1: TAG CHECK AND CREATION
-  # --------------------------------------------------------------------------------
   tag_check:
     name: Check Cargo Version and Create Tag
     runs-on: ubuntu-latest
     
-    # Define job outputs: We will export the new tag name (or empty string)
     outputs:
       new_tag: ${{ steps.tagging.outputs.new_tag }}
       
@@ -30,8 +24,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: Auto-Tag New Version
-        id: tagging # Assign an ID to this step to capture its output
-        # GH_TRIGGER_TOKEN environment variable removed as GITHUB_TOKEN is sufficient for chained jobs
+        id: tagging
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -62,19 +55,13 @@ jobs:
             # Set output to empty string to skip the release_build job
             echo "new_tag=" >> $GITHUB_OUTPUT
           fi
-          
-  # --------------------------------------------------------------------------------
-  # JOB 2: RELEASE BUILD AND UPLOAD
-  # Runs only if a new tag was created in tag_check.
-  # --------------------------------------------------------------------------------
+
   release_build:
     name: Build ${{ matrix.platform }} Binary
     
-    # Conditional run: only proceed if the previous job set a new_tag output
     if: needs.tag_check.outputs.new_tag != ''
     runs-on: ${{ matrix.os }}
     
-    # Dependency on tag_check is required to access its outputs
     needs: tag_check 
     
     strategy:
@@ -96,10 +83,8 @@ jobs:
             target: x86_64-apple-darwin
             
     steps:
-      # Checkout the specific tag that was just created/pushed
       - uses: actions/checkout@v4
         with:
-          # Use the tag name output from the previous job as the ref
           ref: ${{ needs.tag_check.outputs.new_tag }}
       
       - uses: dtolnay/rust-toolchain@stable
@@ -111,7 +96,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
       
-      # Install OS-specific Dependencies
       - name: Install System Dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -128,7 +112,6 @@ jobs:
         shell: bash
         run: cargo update --locked
 
-      # Install Dioxus-CLI using cargo-binstall for speed
       - name: Install Dioxus-CLI
         shell: bash
         env:
@@ -137,12 +120,12 @@ jobs:
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
           cargo binstall dioxus-cli --force
           
-      # Build the native project
       - name: Build Native Project for ${{ matrix.platform }}
         shell: bash
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
 
       - name: Zip the macOS app bundle
+        shell: bash
         run: |
           zip -r target/dx/piecewise/release/${{ matrix.platform }}.zip target/dx/piecewise/release/${{ matrix.platform }}
 
@@ -152,7 +135,6 @@ jobs:
           echo "Listing contents of the expected artifact directory (target/dx/piecewise/release/):"
           ls -R target/dx/piecewise/release/ 2>/dev/null || echo "Directory not found or empty. Check the 'piecewise' app name in your path."
           
-      # Upload the executable to the GitHub Release
       - name: Upload Native Executable to GitHub Release
         uses: softprops/action-gh-release@v1
         with:

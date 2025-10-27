@@ -36,9 +36,9 @@ fn App() -> Element {
                             p { class: "info", "This app is also avaliable to download for offline use." }
                             div {
                                 class: "row",
-                                a { class: "button", href: "/releases/macos/Piecewise.app", "Download for macOS" }
-                                a { class: "button", href: "/releases/windows/Piecewise.exe", "Download for Windows" }
-                                a { class: "button", href: "/releases/linux/Piecewise", "Download for Linux" }
+                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/macos.zip", "Download for macOS" }
+                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/windows.zip", "Download for Windows" }
+                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/linux.zip", "Download for Linux" }
                             }
                         }
                     }
