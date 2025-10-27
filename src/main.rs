@@ -33,13 +33,8 @@ fn App() -> Element {
                     rsx! {
                         details { 
                             summary { "Download the App" }
-                            p { class: "info", "This app is also avaliable to download for offline use." }
-                            div {
-                                class: "row",
-                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/macos.zip", "Download for macOS" }
-                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/windows.zip", "Download for Windows" }
-                                a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases/download/latest/linux.zip", "Download for Linux" }
-                            }
+                            p { class: "info", "This app is also avaliable to download for offline use. Windows, macOS, and Linux versions are available." }
+                            a { class: "button", href: "https://github.com/fabianboesiger/piecewise/releases", "Download" }
                         }
                     }
                 } else {

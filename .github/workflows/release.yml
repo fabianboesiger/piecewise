@@ -124,16 +124,11 @@ jobs:
         shell: bash
         run: dx build --release --platform ${{ matrix.platform }} -- -vv
 
-      - name: Zip the macOS app bundle
-        shell: bash
-        run: |
-          zip -r target/dx/piecewise/release/${{ matrix.platform }}.zip target/dx/piecewise/release/${{ matrix.platform }}
-
-      - name: Verify Artifact Path
-        shell: bash
-        run: |
-          echo "Listing contents of the expected artifact directory (target/dx/piecewise/release/):"
-          ls -R target/dx/piecewise/release/ 2>/dev/null || echo "Directory not found or empty. Check the 'piecewise' app name in your path."
+      - name: Zip the release artifact
+        uses: TheDoctor0/zip-release@main
+        with:
+          filename: target/dx/piecewise/release/${{ matrix.platform }}.zip
+          path: target/dx/piecewise/release/${{ matrix.platform }}
           
       - name: Upload Native Executable to GitHub Release
         uses: softprops/action-gh-release@v1
